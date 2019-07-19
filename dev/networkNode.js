@@ -122,6 +122,11 @@ app.post("/receive-new-block", function(req, res) {
 
 app.post("/register-and-broadcast-node", function(req, res) {
   const newNodeUrl = req.body.newNodeUrl;
+  if (newNodeUrl === moxcoin.currentNodeUrl) {
+    res.json({ note: "New node registered with networks successfully" });
+    return;
+  }
+
   if (moxcoin.networkNodes.indexOf(newNodeUrl) === -1)
     moxcoin.networkNodes.push(newNodeUrl);
 
@@ -218,6 +223,35 @@ app.get("/consensus", function(req, res) {
       });
     }
   });
+});
+
+app.get("/block/:blockHash", function(req, res) {
+  const blockHash = req.params.blockHash;
+  const correctBlock = moxcoin.getBlock(blockHash);
+  res.json({
+    block: correctBlock
+  });
+});
+
+app.get("/transaction/:transactionId", function(req, res) {
+  const transactionId = req.params.transactionId;
+  const response = moxcoin.getTransaction(transactionId);
+  res.json({
+    transaction: response.transaction,
+    block: response.block
+  });
+});
+
+app.get("/address/:address", function(req, res) {
+  const address = req.params.address;
+  const addressData = moxcoin.getAddressData(address);
+  res.json({
+    addressData: addressData
+  });
+});
+
+app.get("/block-explorer", function(req, res) {
+  res.sendFile("./block-explorer/index.html", { root: __dirname });
 });
 
 app.listen(port, function() {
